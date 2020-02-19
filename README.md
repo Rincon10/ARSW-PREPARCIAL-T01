@@ -29,3 +29,39 @@ Puntos 1 y 2: proyecto **moneylaunderingtool**. Punto 3: proyecto **moneylaunder
 
 1. **[25%]** Identifique los archivos de registro de transacciones que son más grandes que los demás (en este caso son 3), y para cada uno de ellos cree un hilo de análisis independiente a los que se le pide crear inicialmente. Se debe asegurar que estos archivos se procesen solo 1 vez.
 2. **[25%]** Para que la solución sea coherente con los diagramas propuestos, publique el API del proyecto (**moneylaunderingapi**) en un ambiente de Heroku, haga que la clase `AccountReporter` reporte a esta instancia.
+
+## Entrega
+
+Siga al pie de la letra estas indicaciones para la entrega de este punto. EL HACER CASO OMISO DE ESTAS INSTRUCCIONES PENALIZARÁ LA NOTA.
+
+1. Limpie los dos proyectos. Entre a los directorios 'PrimesFinderDesktopTool' y 'PrimesAPI' y ejecute:
+
+```bash
+$ mvn clean
+```
+
+2. Configure su usuario de GIT
+
+```bash
+$ git config --global user.name "Juan Perez"
+$ git config --global user.email juan.perez@escuelaing.edu.co
+```
+
+3. Desde el directorio raíz (donde está este archivo README.md), haga commit de lo realizado.
+
+```bash
+$ git add .
+$ git commit -m "entrega parcial - Juan Perez"
+```
+
+4. Desde este mismo directorio, comprima todo con: (no olvide el punto al final de la instrucción)
+
+```bash
+$ zip -r APELLIDO.NOMBRE.zip .
+```
+
+5. Abra el archivo ZIP creado, y rectifique que contenga lo desarrollado.
+
+6. Suba el archivo antes creado (APELLIDO.NOMBRE.zip) en el espacio de moodle correspondiente.
+
+7. IMPORTANTE!. Conserve una copia de la carpeta y del archivo .ZIP.
