@@ -5,6 +5,8 @@ import edu.eci.arsw.moneylaundering.Transaction;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Iván Camilo Rincón Saavedra
@@ -28,18 +30,34 @@ public class TransactionThread extends Thread {
     public void run() {
         try {
             for (int i = a; i < b; i++) {
+                while(stop){
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(TransactionThread.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
                 List<Transaction> transactions = MoneyLaundering.transactionReader.readTransactionsFromFile(transactionFiles.get(i));
-                for(Transaction transaction : transactions)
-                {
+                for(Transaction transaction : transactions) {
                     MoneyLaundering.transactionAnalyzer.addTransaction(transaction);
                 }
                 MoneyLaundering.amountOfFilesProcessed.incrementAndGet();
-
             }
         }
         catch ( Exception exception ){
-
+            exception.printStackTrace();
         }
 
+    }
+
+    public void stopThread() {
+        stop = true;
+    }
+
+    public void resumeThread() {
+        stop = false;
+        synchronized ( this ){
+            notifyAll();
+        }
     }
 }
