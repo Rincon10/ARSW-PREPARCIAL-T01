@@ -1,5 +1,7 @@
 package edu.eci.arsw.moneylaundering;
 
+import edu.eci.arsw.moneylaundering.threads.TransactionThread;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,10 +16,10 @@ import java.util.stream.Stream;
 
 public class MoneyLaundering
 {
-    private TransactionAnalyzer transactionAnalyzer;
-    private TransactionReader transactionReader;
-    private int amountOfFilesTotal;
-    private AtomicInteger amountOfFilesProcessed;
+    public static TransactionAnalyzer transactionAnalyzer;
+    public static TransactionReader transactionReader;
+    public int amountOfFilesTotal;
+    public static AtomicInteger amountOfFilesProcessed;
 
     public MoneyLaundering()
     {
@@ -42,6 +44,35 @@ public class MoneyLaundering
         }
     }
 
+    public void processTransactionData( int numberOfThreads)
+    {
+        List<TransactionThread> transactionThreads;
+        amountOfFilesProcessed.set(0);
+        List<File> transactionFiles = getTransactionFileList();
+        amountOfFilesTotal = transactionFiles.size();
+        int partition = numberOfThreads/amountOfFilesTotal;
+
+        // Crecion de threads
+        transactionThreads = prepareThreads( numberOfThreads,partition , amountOfFilesTotal, transactionFiles);
+        transactionThreads.forEach( t -> t.start());
+
+    }
+
+    private List<TransactionThread> prepareThreads(int numberOfThreads, int partition, int amountOfFilesTotal, List<File> transactionFiles) {
+        List<TransactionThread> threads = new ArrayList<>();
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            int b;
+            TransactionThread thread;
+
+            b = ( i == numberOfThreads - 1 )? amountOfFilesTotal: ((i+1)*partition)-1;
+            thread = new TransactionThread(i*partition, b, transactionFiles);
+            threads.add(thread);
+        }
+
+        return threads;
+    }
+
     public List<String> getOffendingAccounts()
     {
         return transactionAnalyzer.listOffendingAccounts();
@@ -60,9 +91,9 @@ public class MoneyLaundering
 
     public static void main(String[] args)
     {
+        int numberOfThreads = 5;
         MoneyLaundering moneyLaundering = new MoneyLaundering();
-        Thread processingThread = new Thread(() -> moneyLaundering.processTransactionData());
-        processingThread.start();
+        moneyLaundering.processTransactionData( numberOfThreads );
         while(true)
         {
             Scanner scanner = new Scanner(System.in);
