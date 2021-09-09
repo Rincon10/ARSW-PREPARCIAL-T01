@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,24 +49,34 @@ public class MoneyLaundering
         amountOfFilesProcessed.set(0);
         List<File> transactionFiles = getTransactionFileList();
         amountOfFilesTotal = transactionFiles.size();
-        int partition = numberOfThreads/amountOfFilesTotal;
+        int partition = amountOfFilesTotal/numberOfThreads;
 
         // Crecion de threads
         transactionThreads = prepareThreads( numberOfThreads,partition , amountOfFilesTotal, transactionFiles);
-        transactionThreads.forEach( t -> t.start());
+        transactionThreads.forEach( t -> {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
 
     }
 
     private List<TransactionThread> prepareThreads(int numberOfThreads, int partition, int amountOfFilesTotal, List<File> transactionFiles) {
         List<TransactionThread> threads = new ArrayList<>();
-
+        int start = 0;
+        int end = 0;
         for (int i = 0; i < numberOfThreads; i++) {
-            int b;
-            TransactionThread thread;
 
-            b = ( i == numberOfThreads - 1 )? amountOfFilesTotal: ((i+1)*partition)-1;
-            thread = new TransactionThread(i*partition, b, transactionFiles);
-            threads.add(thread);
+            end = start + partition;
+            end+= ( i == 0 )? amountOfFilesTotal%numberOfThreads :0 ;
+
+            threads.add(new TransactionThread(start , end ,transactionFiles));
+
+            //System.out.println(start+" "+end);
+            start = end;
+
         }
 
         return threads;
@@ -91,23 +100,14 @@ public class MoneyLaundering
 
     public static void main(String[] args)
     {
-        int numberOfThreads = 5;
+        int numberOfThreads = 22 ;
         MoneyLaundering moneyLaundering = new MoneyLaundering();
         moneyLaundering.processTransactionData( numberOfThreads );
-        while(true)
-        {
-            Scanner scanner = new Scanner(System.in);
-            String line = scanner.nextLine();
-            if(line.contains("exit"))
-                break;
-            String message = "Processed %d out of %d files.\nFound %d suspect accounts:\n%s";
-            List<String> offendingAccounts = moneyLaundering.getOffendingAccounts();
-            String suspectAccounts = offendingAccounts.stream().reduce("", (s1, s2)-> s1 + "\n"+s2);
-            message = String.format(message, moneyLaundering.amountOfFilesProcessed.get(), moneyLaundering.amountOfFilesTotal, offendingAccounts.size(), suspectAccounts);
-            System.out.println(message);
-        }
 
+        String message = "Processed %d out of %d files.\nFound %d suspect accounts:\n%s";
+        List<String> offendingAccounts = moneyLaundering.getOffendingAccounts();
+        String suspectAccounts = offendingAccounts.stream().reduce("", (s1, s2)-> s1 + "\n"+s2);
+        message = String.format(message, moneyLaundering.amountOfFilesProcessed.get(), moneyLaundering.amountOfFilesTotal, offendingAccounts.size(), suspectAccounts);
+        System.out.println(message);
     }
-
-
 }

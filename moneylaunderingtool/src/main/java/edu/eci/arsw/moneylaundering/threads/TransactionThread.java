@@ -21,18 +21,25 @@ public class TransactionThread extends Thread {
         this.b = b;
         this.transactionFiles = transactionFiles;
         stop=false;
+        start();
     }
 
     @Override
     public void run() {
-        for (int i = a; i < b; i++) {
-            List<Transaction> transactions = MoneyLaundering.transactionReader.readTransactionsFromFile(transactionFiles.get(i));
-            for(Transaction transaction : transactions)
-            {
-                MoneyLaundering.transactionAnalyzer.addTransaction(transaction);
+        try {
+            for (int i = a; i < b; i++) {
+                List<Transaction> transactions = MoneyLaundering.transactionReader.readTransactionsFromFile(transactionFiles.get(i));
+                for(Transaction transaction : transactions)
+                {
+                    MoneyLaundering.transactionAnalyzer.addTransaction(transaction);
+                }
+                MoneyLaundering.amountOfFilesProcessed.incrementAndGet();
+
             }
-            MoneyLaundering.amountOfFilesProcessed.incrementAndGet();
+        }
+        catch ( Exception exception ){
 
         }
+
     }
 }
