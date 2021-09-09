@@ -18,10 +18,11 @@ public class MoneyLaundering
 {
     public static TransactionAnalyzer transactionAnalyzer;
     public static TransactionReader transactionReader;
-    public int amountOfFilesTotal;
+    public static int amountOfFilesTotal;
     public static AtomicInteger amountOfFilesProcessed;
     public static  boolean stop = false;
     public static List<TransactionThread> threads;
+
 
     public MoneyLaundering()
     {
@@ -107,14 +108,14 @@ public class MoneyLaundering
         threads.forEach( t -> t.resumeThread() );
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         // Number of threads debe ser menor a los archivos a analizar
         int numberOfThreads = 22;
         MoneyLaundering moneyLaundering = new MoneyLaundering();
         moneyLaundering.processTransactionData( numberOfThreads );
 
         System.out.println("Presione enter");
-        while(true) {
+        while( true ) {
             Scanner scanner = new Scanner(System.in);
             String line = scanner.nextLine();
             stop=!stop;
@@ -129,6 +130,7 @@ public class MoneyLaundering
             if(line.contains("exit"))
                 break;
         }
+        System.out.println("=================================Termine=================================");
         printMessage( moneyLaundering);
     }
 
